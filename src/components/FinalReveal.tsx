@@ -2,8 +2,7 @@
 "use client";
 import { decodeResults } from "../utils/encodeResults";
 import Confetti from "react-confetti";
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../styles/FinalReveal.module.css";
 
 const QUESTIONS = [
@@ -41,10 +40,12 @@ function VibeCard({
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = () => {
-    const fullUrl = `${window.location.origin}${window.location.pathname}?results=${link}`;
-    navigator.clipboard.writeText(fullUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof window !== "undefined") {
+      const fullUrl = `${window.location.origin}${window.location.pathname}?results=${link}`;
+      navigator.clipboard.writeText(fullUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -124,27 +125,24 @@ function MatchResult({
 }
 
 export default function FinalReveal({ results, creatorResults }: { results: string; creatorResults?: string | null }) {
-  const params = useSearchParams();
-  
-  // Parse results - handle both new format with | and old format
-  let myResults = results;
-  let partnerResults = creatorResults;
-  
-  if (results.includes("|")) {
-    const [respondentResults, creatorResults_] = results.split("|");
-    myResults = respondentResults;
-    partnerResults = creatorResults_;
-  } else {
-    // Check if there's a results parameter in URL (for backward compatibility)
-    partnerResults = params.get("results") || creatorResults;
+  const [mounted, setMounted] = useState(false);
+  const [partnerResults, setPartnerResults] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    setPartnerResults(creatorResults || null);
+  }, [creatorResults]);
+
+  if (!mounted) {
+    return null;
   }
-  
-  const myData = decodeResults(myResults);
+
+  const myData = decodeResults(results);
   const theirData = partnerResults ? decodeResults(partnerResults) : null;
 
-  const baseUrl =
-    typeof window !== "undefined" ? window.location.origin : "";
-  const shareUrl = `${baseUrl}${typeof window !== "undefined" ? window.location.pathname : ""}?results=${myResults}`;
+  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const shareUrl = `${baseUrl}${pathname}?results=${results}`;
 
   return (
     <div className={styles.container}>
@@ -162,7 +160,7 @@ export default function FinalReveal({ results, creatorResults }: { results: stri
               label="Your Vibe Awaits"
               name={myData.name}
               showCopy={true}
-              link={myResults}
+              link={results}
             />
 
             <div className={styles.shareSection}>
