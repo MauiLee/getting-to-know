@@ -17,7 +17,7 @@ const questions = [
   ["City vibes", "Nature vibes"],
 ];
 
-export default function QuizContainer({ name, creatorResults, onFinish }: { name: string; creatorResults?: string | null; onFinish: (results: string) => void }) {
+export default function QuizContainer({ name, onFinish }: { name: string; onFinish: (results: string) => void }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
 
@@ -28,12 +28,7 @@ export default function QuizContainer({ name, creatorResults, onFinish }: { name
       setStep(step + 1);
     } else {
       const encoded = encodeResults(name, newAnswers);
-      // Pass both results if creator results exist
-      if (creatorResults) {
-        onFinish(`${encoded}|${creatorResults}`);
-      } else {
-        onFinish(encoded);
-      }
+      onFinish(encoded);
     }
   };
 

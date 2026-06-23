@@ -1,26 +1,52 @@
 "use client";
-import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import GatekeeperIntro from "../components/GatekeeperIntro";
 import QuizContainer from "../components/QuizContainer";
 import FinalReveal from "../components/FinalReveal";
 
-function HomeContent() {
-  const params = useSearchParams();
-  const creatorResults = params.get("results");
-  const [started, setStarted] = useState(false);
-  const [name, setName] = useState("");
-  const [finished, setFinished] = useState<string | null>(null);
-
-  if (!started) return <GatekeeperIntro onStart={(userName) => { setName(userName); setStarted(true); }} />;
-  if (finished) return <FinalReveal results={finished} creatorResults={creatorResults} />;
-  return <QuizContainer name={name} creatorResults={creatorResults} onFinish={(results) => setFinished(results)} />;
-}
-
 export default function Home() {
-  return (
-    <Suspense fallback={<div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", background: "#000", color: "#FFFF00", fontSize: "1.5rem", fontWeight: "bold" }}>Loading...</div>}>
-      <HomeContent />
-    </Suspense>
-  );
+  const [started, setStarted] = useState(false);
+  const [results, setResults] = useState<string | null>(null);
+  const [creatorResults, setCreatorResults] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    // Check if there's a creatorResults in URL
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlResults = params.get("results");
+      if (urlResults) {
+        setCreatorResults(urlResults);
+      }
+    }
+  }, []);
+
+  if (!mounted) return null;
+
+  // Show intro first
+  if (!started) {
+    return <GatekeeperIntro onStart={() => setStarted(true)} />;
+  }
+
+  // Show quiz after start
+  if (!results) {
+    return (
+      <QuizContainer 
+        name="You" 
+        onFinish={(encodedResults) => {
+          setResults(encodedResults);
+        }} 
+      />
+    );
+  }
+
+  // Show final results with match if creator results exist
+  if (creatorResults) {
+    // Both people answered - show match
+    return <FinalReveal results={`${results}|${creatorResults}`} />;
+  }
+
+  // Only this person answered - show result + share link
+  return <FinalReveal results={results} />;
 }

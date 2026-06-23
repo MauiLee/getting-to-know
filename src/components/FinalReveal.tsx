@@ -4,50 +4,17 @@ import { decodeResults } from "../utils/encodeResults";
 import Confetti from "react-confetti";
 import { useState, useEffect } from "react";
 import styles from "../styles/FinalReveal.module.css";
-
-const QUESTIONS = [
-  ["Late night drives", "Cozy cafe dates"],
-  ["Over-thinker", "Go with the flow"],
-  ["Movies", "Books"],
-  ["Adventure", "Chill"],
-  ["Texting", "Calling"],
-  ["Planning everything", "Spontaneous"],
-  ["Introvert", "Extrovert"],
-  ["Coffee", "Tea"],
-  ["Morning person", "Night owl"],
-  ["City vibes", "Nature vibes"],
-];
-
 import { QuizData } from "../utils/encodeResults";
-
-interface AnswerSet {
-  answers: string[];
-}
 
 function VibeCard({
   answers,
   label,
   name = "",
-  showCopy = false,
-  link = "",
 }: {
   answers: string[];
   label: string;
   name?: string;
-  showCopy?: boolean;
-  link?: string;
 }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopyLink = () => {
-    if (typeof window !== "undefined") {
-      const fullUrl = `${window.location.origin}${window.location.pathname}?results=${link}`;
-      navigator.clipboard.writeText(fullUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
   return (
     <div className={styles.vibeCard}>
       <div className={styles.vibeCardHeader}>
@@ -62,16 +29,6 @@ function VibeCard({
           </div>
         ))}
       </div>
-
-      {showCopy && (
-        <button
-          onClick={handleCopyLink}
-          className={styles.copyButton}
-          title="Copy shareable link"
-        >
-          {copied ? "✓ Copied!" : "📋 Copy Link"}
-        </button>
-      )}
     </div>
   );
 }
@@ -162,53 +119,35 @@ export default function FinalReveal({ results, creatorResults }: { results: stri
               showCopy={true}
               link={results}
             />
+// Parse results - format is "encoded1|encoded2" if both people answered
+  const parts = results.includes("|") ? results.split("|") : [results];
+  const myData = decodeResults(parts[0]);
+  const theirData = parts[1] ? decodeResults(parts[1]) : partnerResults ? decodeResults(partnerResults) : null;
 
-            <div className={styles.shareSection}>
-              <h3 className={styles.shareTitle}>Send to Partner</h3>
-              <div className={styles.linkBox}>
-                <input
-                  type="text"
-                  value={shareUrl}
-                  readOnly
-                  className={styles.linkInput}
-                />
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(shareUrl);
-                    alert("Link copied to clipboard!");
-                  }}
-                  className={styles.buttonPrimary}
-                >
-                  Copy Full Link
-                </button>
-              </div>
-              <p className={styles.shareInstructions}>
-                or share this code:
-                <br />
-                <code className={styles.shareCode}>{results}</code>
-              </p>
-            </div>
-          </>
-        ) : (
-          // Match mode - show both cards and compatibility
+  return (
+    <div className={styles.container}>
+      <div className={styles.content}>
+        {theirData ? (
           <>
             <Confetti />
             <MatchResult myData={myData} theirData={theirData} />
-
             <div className={styles.actionButtons}>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => window.location.href = "/"}
                 className={styles.buttonPrimary}
               >
-                Try Again
+                Start Over
               </button>
-              <a href="/" className={styles.buttonSecondary}>
-                Back Home
-              </a>
             </div>
           </>
-        )}
-      </div>
-    </div>
-  );
-}
+        ) : (
+          <>
+            <div className={styles.headerBox}>
+              <h1 className={styles.title}>Your Vibe Card ✨</h1>
+              <p className={styles.subtitle}>{myData.name}</p>
+            </div>
+            <VibeCard
+              answers={myData.answers}
+              label="Your Vibes"
+              name={myData.name}
+            /
