@@ -1,0 +1,187 @@
+/* ===== GLOBAL RETRO-GAMIFIED STYLES ===== */
+
+:root {
+  --cyber-yellow: #FFFF00;
+  --electric-purple: #9D00FF;
+  --neon-mint: #00FF88;
+  --deep-black: #000000;
+  --dark-gray: #1a1a1a;
+  --bold-pink: #FF1493;
+  --cyber-cyan: #00FFFF;
+  --retro-orange: #FF6600;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', 'Courier New', monospace;
+  background: var(--deep-black);
+  color: var(--cyber-yellow);
+  overflow-x: hidden;
+}
+
+body {
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+}
+
+/* Main app background pattern */
+main {
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      var(--deep-black),
+      var(--deep-black) 2px,
+      var(--dark-gray) 2px,
+      var(--dark-gray) 4px
+    );
+  position: relative;
+}
+
+main::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    linear-gradient(0deg, transparent 24%, rgba(255, 255, 0, 0.02) 25%, rgba(255, 255, 0, 0.02) 26%, transparent 27%, transparent 74%, rgba(255, 255, 0, 0.02) 75%, rgba(255, 255, 0, 0.02) 76%, transparent 77%, transparent),
+    linear-gradient(90deg, transparent 24%, rgba(255, 255, 0, 0.02) 25%, rgba(255, 255, 0, 0.02) 26%, transparent 27%, transparent 74%, rgba(255, 255, 0, 0.02) 75%, rgba(255, 255, 0, 0.02) 76%, transparent 77%, transparent);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cyber-yellow);
+  text-shadow: 2px 2px 0px var(--deep-black);
+}
+
+h1 {
+  font-size: 3rem;
+}
+
+h2 {
+  font-size: 2.2rem;
+}
+
+h3 {
+  font-size: 1.8rem;
+}
+
+/* Links */
+a {
+  color: var(--cyber-cyan);
+  text-decoration: none;
+  font-weight: 700;
+  border-bottom: 2px solid var(--bold-pink);
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: var(--bold-pink);
+  border-bottom-color: var(--cyber-cyan);
+  text-shadow: 2px 2px 0px var(--cyber-yellow);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-gray);
+  border: 2px solid var(--deep-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--electric-purple);
+  border: 2px solid var(--deep-black);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--bold-pink);
+}
+
+/* Selection styling */
+::selection {
+  background: var(--cyber-yellow);
+  color: var(--deep-black);
+  text-shadow: none;
+}
+
+::-moz-selection {
+  background: var(--cyber-yellow);
+  color: var(--deep-black);
+}
+
+/* Input, textarea, select */
+input,
+textarea,
+select {
+  font-family: 'Arial', 'Courier New', monospace;
+  font-size: 1rem;
+  border: 4px solid var(--deep-black);
+  padding: 12px 15px;
+  background: var(--cyber-yellow);
+  color: var(--deep-black);
+  box-shadow: 4px 4px 0px var(--deep-black);
+  transition: all 0.1s linear;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  background: var(--cyber-cyan);
+  box-shadow: 
+    6px 6px 0px var(--deep-black),
+    10px 10px 0px var(--bold-pink);
+  transform: translate(-2px, -2px);
+}
+
+input::placeholder {
+  color: var(--dark-gray);
+  font-weight: 600;
+}
+
+/* Buttons global defaults */
+button {
+  font-family: 'Arial', 'Courier New', monospace;
+  cursor: pointer;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    color: black;
+    border-bottom: 1px solid black;
+  }
+}
