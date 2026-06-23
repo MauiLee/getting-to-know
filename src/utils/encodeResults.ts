@@ -1,12 +1,17 @@
 // src/utils/encodeResults.ts
-export default function encodeResults(answers: string[]): string {
-  return btoa(JSON.stringify(answers));
+export interface QuizData {
+  name: string;
+  answers: string[];
 }
 
-export function decodeResults(encoded: string): string[] {
+export default function encodeResults(name: string, answers: string[]): string {
+  return btoa(JSON.stringify({ name, answers }));
+}
+
+export function decodeResults(encoded: string): QuizData {
   try {
     return JSON.parse(atob(encoded));
   } catch {
-    return [];
+    return { name: "Unknown", answers: [] };
   }
 }

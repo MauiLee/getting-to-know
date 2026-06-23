@@ -12,7 +12,14 @@ const QUESTIONS = [
   ["Movies", "Books"],
   ["Adventure", "Chill"],
   ["Texting", "Calling"],
+  ["Planning everything", "Spontaneous"],
+  ["Introvert", "Extrovert"],
+  ["Coffee", "Tea"],
+  ["Morning person", "Night owl"],
+  ["City vibes", "Nature vibes"],
 ];
+
+import { QuizData } from "../utils/encodeResults";
 
 interface AnswerSet {
   answers: string[];
@@ -21,11 +28,13 @@ interface AnswerSet {
 function VibeCard({
   answers,
   label,
+  name = "",
   showCopy = false,
   link = "",
 }: {
   answers: string[];
   label: string;
+  name?: string;
   showCopy?: boolean;
   link?: string;
 }) {
@@ -42,6 +51,7 @@ function VibeCard({
     <div className={styles.vibeCard}>
       <div className={styles.vibeCardHeader}>
         <h2 className={styles.vibeCardLabel}>{label}</h2>
+        {name && <p style={{ fontSize: "14px", color: "#666", margin: "5px 0 0 0" }}>~ {name}</p>}
       </div>
       <div className={styles.vibeCardContent}>
         {answers.map((answer, idx) => (
@@ -66,21 +76,22 @@ function VibeCard({
 }
 
 function MatchResult({
-  myAnswers,
-  theirAnswers,
+  myData,
+  theirData,
 }: {
-  myAnswers: string[];
-  theirAnswers: string[];
+  myData: QuizData;
+  theirData: QuizData;
 }) {
   let matchCount = 0;
-  myAnswers.forEach((answer, idx) => {
-    if (answer === theirAnswers[idx]) matchCount++;
+  myData.answers.forEach((answer, idx) => {
+    if (answer === theirData.answers[idx]) matchCount++;
   });
-  const compatibility = Math.round((matchCount / myAnswers.length) * 100);
+  const compatibility = Math.round((matchCount / myData.answers.length) * 100);
 
   return (
     <div className={styles.matchResult}>
-      <h2 className={styles.matchTitle}>✨ Compatibility Match ✨</h2>
+      <h2 className={styles.matchTitle}>✨ {myData.name} & {theirData.name} ✨</h2>
+      <h3 style={{ textAlign: "center", fontSize: "16px", marginBottom: "20px" }}>Compatibility Match</h3>
       <div className={styles.compatibilityScore}>
         <span className={styles.scoreValue}>{compatibility}%</span>
         <div className={styles.compatibilityBar}>
@@ -92,8 +103,8 @@ function MatchResult({
       </div>
 
       <div className={styles.matchGrid}>
-        <VibeCard answers={myAnswers} label="Your Vibe" />
-        <VibeCard answers={theirAnswers} label="Their Vibe" />
+        <VibeCard answers={myData.answers} label="Your Vibe" name={myData.name} />
+        <VibeCard answers={theirData.answers} label="Their Vibe" name={theirData.name} />
       </div>
 
       <div className={styles.matchDetails}>
@@ -105,27 +116,40 @@ function MatchResult({
               : "💫 You're Interesting!"}
         </h3>
         <p className={styles.matchMessage}>
-          You matched on {matchCount} out of {myAnswers.length} questions!
+          You matched on {matchCount} out of {myData.answers.length} questions!
         </p>
       </div>
     </div>
   );
 }
 
-export default function FinalReveal({ results }: { results: string }) {
+export default function FinalReveal({ results, creatorResults }: { results: string; creatorResults?: string | null }) {
   const params = useSearchParams();
-  const partnerResults = params.get("results");
-  const myAnswers = decodeResults(results);
-  const theirAnswers = partnerResults ? decodeResults(partnerResults) : null;
+  
+  // Parse results - handle both new format with | and old format
+  let myResults = results;
+  let partnerResults = creatorResults;
+  
+  if (results.includes("|")) {
+    const [respondentResults, creatorResults_] = results.split("|");
+    myResults = respondentResults;
+    partnerResults = creatorResults_;
+  } else {
+    // Check if there's a results parameter in URL (for backward compatibility)
+    partnerResults = params.get("results") || creatorResults;
+  }
+  
+  const myData = decodeResults(myResults);
+  const theirData = partnerResults ? decodeResults(partnerResults) : null;
 
   const baseUrl =
     typeof window !== "undefined" ? window.location.origin : "";
-  const shareUrl = `${baseUrl}${typeof window !== "undefined" ? window.location.pathname : ""}?results=${results}`;
+  const shareUrl = `${baseUrl}${typeof window !== "undefined" ? window.location.pathname : ""}?results=${myResults}`;
 
   return (
     <div className={styles.container}>
       <div className={styles.content}>
-        {!theirAnswers ? (
+        {!theirData ? (
           // Solo mode - show vibe card with share link
           <>
             <div className={styles.headerBox}>
@@ -134,10 +158,11 @@ export default function FinalReveal({ results }: { results: string }) {
             </div>
 
             <VibeCard
-              answers={myAnswers}
+              answers={myData.answers}
               label="Your Vibe Awaits"
+              name={myData.name}
               showCopy={true}
-              link={results}
+              link={myResults}
             />
 
             <div className={styles.shareSection}>
@@ -170,7 +195,7 @@ export default function FinalReveal({ results }: { results: string }) {
           // Match mode - show both cards and compatibility
           <>
             <Confetti />
-            <MatchResult myAnswers={myAnswers} theirAnswers={theirAnswers} />
+            <MatchResult myData={myData} theirData={theirData} />
 
             <div className={styles.actionButtons}>
               <button

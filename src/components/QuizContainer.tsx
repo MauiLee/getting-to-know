@@ -10,9 +10,14 @@ const questions = [
   ["Movies", "Books"],
   ["Adventure", "Chill"],
   ["Texting", "Calling"],
+  ["Planning everything", "Spontaneous"],
+  ["Introvert", "Extrovert"],
+  ["Coffee", "Tea"],
+  ["Morning person", "Night owl"],
+  ["City vibes", "Nature vibes"],
 ];
 
-export default function QuizContainer({ onFinish }: { onFinish: (results: string) => void }) {
+export default function QuizContainer({ name, creatorResults, onFinish }: { name: string; creatorResults?: string | null; onFinish: (results: string) => void }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
 
@@ -22,8 +27,13 @@ export default function QuizContainer({ onFinish }: { onFinish: (results: string
     if (step < questions.length - 1) {
       setStep(step + 1);
     } else {
-      const encoded = encodeResults(newAnswers);
-      onFinish(encoded);
+      const encoded = encodeResults(name, newAnswers);
+      // Pass both results if creator results exist
+      if (creatorResults) {
+        onFinish(`${encoded}|${creatorResults}`);
+      } else {
+        onFinish(encoded);
+      }
     }
   };
 
